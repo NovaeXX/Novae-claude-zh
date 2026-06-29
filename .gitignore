@@ -1,0 +1,19 @@
+# Runtime output
+backups/*
+!backups/.gitkeep
+downloads/*
+logs/*
+
+# Machine-local configuration
+config/paths.local.json
+config/install-claude-oauth-callback.reg
+
+# Local transient files
+*.tmp
+*.bak
+*.log
+__pycache__/
+
+# Generated app copies should not be committed
+ClaudeZhCN*/
+Claude/

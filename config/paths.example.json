@@ -1,0 +1,11 @@
+{
+  "projectRoot": "D:\\Projects\\claude_zh",
+  "pythonExe": "py",
+  "fomoRoot": "D:\\Tools\\CC-desktop-zh-cn-WIN-portable-main",
+  "fomoPatchScript": "D:\\Tools\\CC-desktop-zh-cn-WIN-portable-main\\cc_desktop_zh_cn_windows.py",
+  "portableClaudeDir": "D:\\Apps\\ClaudeZhCN\\Claude",
+  "portableUserDataDir": "C:\\Users\\<your-user>\\AppData\\Roaming\\ClaudeZhCN-3p",
+  "launcherPath": "C:\\Users\\<your-user>\\AppData\\Local\\ClaudeZhCN\\launch_claude_zh_cn.vbs",
+  "overridesDir": "D:\\Projects\\claude_zh\\overrides",
+  "backupDir": "D:\\Projects\\claude_zh\\backups"
+}

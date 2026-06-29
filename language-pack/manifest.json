@@ -1,0 +1,27 @@
+{
+  "name": "claude-zh-cn-language-pack",
+  "version": "0.1.7",
+  "updatedAt": "2026-06-27",
+  "target": {
+    "platform": "win32-x64",
+    "claudeDesktopVersion": "1.14271.0"
+  },
+  "layers": {
+    "base": "FOMO CC-desktop-zh-cn-WIN-portable",
+    "localResourceOverrides": [
+      "overrides/frontend-zh-CN.override.json",
+      "overrides/desktop-zh-CN.override.json",
+      "overrides/statsig-zh-CN.override.json"
+    ],
+    "remoteDomOverrides": "overrides/remote-dom-zh-CN.override.json",
+    "remoteDomFragments": "overrides/remote-dom-fragments-zh-CN.override.json"
+  },
+  "patchCapabilities": [
+    "exact text replacement",
+    "phrase replacement",
+    "fragment replacement",
+    "attribute replacement",
+    "Shadow DOM traversal",
+    "runtime pending translation logging"
+  ]
+}
