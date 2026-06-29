@@ -7,7 +7,7 @@
     "claudeDesktopVersion": "1.14271.0"
   },
   "layers": {
-    "base": "FOMO CC-desktop-zh-cn-WIN-portable",
+    "base": "Claude zh-CN base resource layer",
     "localResourceOverrides": [
       "overrides/frontend-zh-CN.override.json",
       "overrides/desktop-zh-CN.override.json",

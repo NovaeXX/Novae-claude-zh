@@ -8,7 +8,7 @@
 
 1. 读取当前 `claude://` 协议处理器。
 2. 备份当前协议处理器到 `backups/oauth-protocol/`。
-3. 调用 FOMO 的 `--prepare-oauth-login`，让回调指向汉化启动器。
+3. 调用补丁工具的 `--prepare-oauth-login`，让回调指向汉化启动器。
 4. 验证启动器是否带 `--user-data-dir`。
 5. 诊断报告中显示当前回调状态。
 
@@ -23,10 +23,10 @@
 
 任务：
 
-1. 调用 FOMO `--check-update` 获取版本状态。
-2. 调用 FOMO `--force-download` 下载并重建新版汉化版。
+1. 调用补丁工具 `--check-update` 获取版本状态。
+2. 调用补丁工具 `--force-download` 下载并重建新版汉化版。
 3. 合并本地增量翻译到最终 `zh-CN.json`。
-4. 调用 FOMO `--apply-user-settings` 重建启动器和快捷方式。
+4. 调用补丁工具 `--apply-user-settings` 重建启动器和快捷方式。
 5. 输出汉化覆盖率和英文回退数量。
 
 验收：

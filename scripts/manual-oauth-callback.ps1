@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$CallbackUrl,
   [switch]$FromProtocol
 )

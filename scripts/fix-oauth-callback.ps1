@@ -11,9 +11,9 @@ Write-Host ""
 $backup = Backup-ClaudeProtocolCommand -Config $config
 Write-Host "已备份当前回调状态: $backup" -ForegroundColor Green
 
-$code = Invoke-FomoPatcher -Config $config -PatchArgs @("--prepare-oauth-login")
+$code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--prepare-oauth-login")
 if ($code -ne 0) {
-  Write-Host "FOMO --prepare-oauth-login 执行失败，返回码: $code" -ForegroundColor Yellow
+  Write-Host "补丁工具 --prepare-oauth-login 执行失败，返回码: $code" -ForegroundColor Yellow
   Write-Host "改用本地回调写入：不重建启动器，只把 claude:// 指向现有汉化启动器。" -ForegroundColor Yellow
   try {
     $command = Set-ClaudeProtocolToLauncher -Config $config

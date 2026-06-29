@@ -129,7 +129,31 @@ cd Novae-claude-zh
 
 如果你想放到其它目录，把 `D:\Projects` 换成自己的项目目录即可。
 
-### 3. 创建本机配置
+### 3. 推荐一键部署
+
+进入项目目录后运行：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+```
+
+这个向导会完成：
+
+- 创建 `config\paths.local.json`。
+- 创建 `backups/`、`reports/`、`downloads/`、`logs/` 等本机目录。
+- 检查 Python、补丁脚本、便携版 Claude、启动器和用户数据目录。
+- 运行诊断，输出当前失败点。
+- 提示下一步是否需要安装登录回调桥接器。
+
+如果你希望部署时同时安装登录回调桥接器，可以运行：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -InstallCallbackBridge
+```
+
+`-InstallCallbackBridge` 会写入当前 Windows 用户的 `claude://` 协议处理器。它能让浏览器登录 Claude 后回到当前汉化版窗口，但也属于本机系统配置变更。
+
+### 4. 手动创建本机配置
 
 复制示例配置：
 
@@ -152,7 +176,7 @@ notepad .\config\paths.local.json
 - 增量翻译目录：本项目 `overrides` 目录。
 - 备份目录：本项目 `backups` 目录。
 
-### 4. 第一次诊断
+### 5. 第一次诊断
 
 先不要直接更新或修补，先运行诊断：
 
@@ -168,7 +192,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\diagnose.ps1
 - `Locale config` 是否为 `zh-CN`。
 - `claude:// callback` 是否指向本项目脚本。
 
-### 5. 安装登录回调桥接器
+### 6. 安装登录回调桥接器
 
 如果诊断显示 `claude://` 没有指向本项目，运行：
 
@@ -178,7 +202,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-oauth-
 
 这一步会修改当前 Windows 用户的 `claude://` 协议处理器。它的作用是：浏览器登录 Claude 后，把回调交给当前汉化版窗口，而不是打开官方版或旧路径。
 
-### 6. 启动管理器
+### 7. 启动管理器
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-manager.ps1
@@ -192,7 +216,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-mana
 4. 启动 Claude zh-CN。
 5. 浏览器登录并确认回到汉化窗口。
 
-### 7. 后续更新项目
+### 8. 后续更新项目
 
 以后要更新本项目代码，可以在项目目录执行：
 
@@ -201,6 +225,18 @@ git pull
 ```
 
 如果你改过 `overrides/` 里的翻译文件，更新前建议先提交或备份自己的改动，避免合并时难以判断差异。
+
+## AI 助手协作
+
+不建议把普通用户部署依赖在某个 AI 平台的 skill 上。Skill 更适合让 AI 助手理解项目上下文，不适合作为普通用户的一键安装方式。
+
+本项目提供更通用的协作入口：
+
+- Codex 用户：优先读取 `AGENTS.md`。
+- Claude Code 用户：优先读取 `CLAUDE.md`。
+- 普通用户：直接运行 `scripts\setup.ps1`。
+
+这样做的好处是：普通用户、Codex 用户、Claude Code 用户都使用同一个部署脚本，不会因为 AI 平台不同而出现不同安装路径。
 
 ## 推荐使用流程
 

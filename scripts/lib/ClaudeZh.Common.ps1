@@ -13,7 +13,18 @@ function Get-ClaudeZhConfig {
     $examplePath = Join-Path $root "config\paths.example.json"
     throw "缺少本机配置文件: $configPath。请复制 $examplePath 为 paths.local.json，并按本机路径修改。"
   }
-  return Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  return Normalize-ClaudeZhConfig -Config $config
+}
+
+function Normalize-ClaudeZhConfig {
+  param([Parameter(Mandatory = $true)]$Config)
+
+  $names = @($Config.PSObject.Properties.Name)
+  if (($names -notcontains "projectRoot") -or [string]::IsNullOrWhiteSpace($Config.projectRoot)) {
+    $Config | Add-Member -NotePropertyName "projectRoot" -NotePropertyValue (Get-ClaudeZhProjectRoot) -Force
+  }
+  return $Config
 }
 
 function Resolve-ClaudeZhPython {
@@ -47,14 +58,15 @@ function Write-ClaudeJsonNoBom {
   [System.IO.File]::WriteAllText($Path, $json + [Environment]::NewLine, $encoding)
 }
 
-function Invoke-FomoPatcher {
+function Invoke-ClaudeZhPatchTool {
   param(
     [Parameter(Mandatory = $true)]$Config,
     [string[]]$PatchArgs = @()
   )
 
-  if (-not (Test-Path -LiteralPath $Config.fomoPatchScript)) {
-    throw "缺少 FOMO 补丁脚本: $($Config.fomoPatchScript)"
+  $patchScript = $Config.patchScript
+  if ([string]::IsNullOrWhiteSpace($patchScript) -or -not (Test-Path -LiteralPath $patchScript)) {
+    throw "缺少补丁脚本: $patchScript"
   }
 
   $python = Resolve-ClaudeZhPython -Config $Config
@@ -64,7 +76,7 @@ function Invoke-FomoPatcher {
     $args += "-3"
   }
 
-  $args += $Config.fomoPatchScript
+  $args += $patchScript
   $args += "--target-dir"
   $args += $Config.portableClaudeDir
   $args += $PatchArgs

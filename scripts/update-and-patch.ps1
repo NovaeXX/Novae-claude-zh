@@ -1,4 +1,4 @@
-param(
+﻿param(
   [switch]$CheckOnly,
   [switch]$Force,
   [switch]$CloseClaude
@@ -12,7 +12,7 @@ Write-Host ""
 Write-Host "Claude zh-CN update and patch" -ForegroundColor Cyan
 Write-Host ""
 
-$checkCode = Invoke-FomoPatcher -Config $config -PatchArgs @("--check-update")
+$checkCode = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--check-update")
 
 if ($CheckOnly) {
   exit $checkCode
@@ -32,15 +32,15 @@ Write-Host "  File count:  $($backup.FileCount)"
 
 if ($checkCode -eq 0 -and -not $Force) {
   Write-Host "Already up to date. Applying user settings and local overrides only." -ForegroundColor Green
-  $code = Invoke-FomoPatcher -Config $config -PatchArgs @("--apply-user-settings")
+  $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
   if ($code -ne 0) {
-    throw "FOMO --apply-user-settings failed. Exit code: $code"
+    throw "Patch tool --apply-user-settings failed. Exit code: $code"
   }
 } else {
   Write-Host "Updating and rebuilding zh-CN portable Claude. This may download official MSIX." -ForegroundColor Yellow
-  $code = Invoke-FomoPatcher -Config $config -PatchArgs @("--force-download")
+  $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--force-download")
   if ($code -ne 0) {
-    throw "FOMO --force-download failed. Exit code: $code"
+    throw "Patch tool --force-download failed. Exit code: $code"
   }
 }
 
@@ -64,9 +64,9 @@ foreach ($result in $shadowResults) {
 
 Write-Host ""
 Write-Host "Refreshing launcher, shortcuts, and locale settings..."
-$code = Invoke-FomoPatcher -Config $config -PatchArgs @("--apply-user-settings")
+$code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
 if ($code -ne 0) {
-  throw "FOMO --apply-user-settings failed. Exit code: $code"
+  throw "Patch tool --apply-user-settings failed. Exit code: $code"
 }
 
 Write-Host ""

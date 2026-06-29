@@ -1,24 +1,24 @@
-. "$PSScriptRoot\lib\ClaudeZh.Common.ps1"
+﻿. "$PSScriptRoot\lib\ClaudeZh.Common.ps1"
 
 $config = Get-ClaudeZhConfig
 
 function Pause-ClaudeZhMenu {
   Write-Host ""
-  Read-Host "Press Enter to continue"
+  Read-Host "按 Enter 继续"
 }
 
 function Start-ClaudeZh {
   Set-ClaudeZhPortableLocale -Config $config | Out-Null
   if (-not (Test-Path -LiteralPath $config.launcherPath)) {
-    Write-Host "zh-CN launcher not found. Refreshing user settings first." -ForegroundColor Yellow
-    $code = Invoke-FomoPatcher -Config $config -PatchArgs @("--apply-user-settings")
+    Write-Host "未找到 zh-CN 启动器，先刷新用户设置。" -ForegroundColor Yellow
+    $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
     if ($code -ne 0) {
-      throw "Could not create zh-CN launcher. Exit code: $code"
+      throw "无法创建 zh-CN 启动器。退出码: $code"
     }
   }
 
   Start-Process -FilePath "wscript.exe" -ArgumentList "`"$($config.launcherPath)`"" -WindowStyle Hidden
-  Write-Host "Claude zh-CN started." -ForegroundColor Green
+  Write-Host "Claude zh-CN 已启动。" -ForegroundColor Green
 }
 
 function Confirm-ClaudeZhManagerAction {
@@ -29,7 +29,7 @@ function Confirm-ClaudeZhManagerAction {
 
   Write-Host ""
   Write-Host $Message -ForegroundColor Yellow
-  $answer = Read-Host "Type $Token to continue"
+  $answer = Read-Host "输入 $Token 继续"
   return ($answer -eq $Token)
 }
 
@@ -44,33 +44,33 @@ while ($true) {
   Write-Host " Claude zh-CN Manager" -ForegroundColor Cyan
   Write-Host "============================================" -ForegroundColor Cyan
   Write-Host ""
-  Write-Host "Daily"
-  Write-Host " 1. Start Claude zh-CN"
-  Write-Host " 2. Diagnose current state"
-  Write-Host " 3. Check official update"
-  Write-Host " 4. One-click update and re-patch"
+  Write-Host "日常使用"
+  Write-Host " 1. 启动 Claude zh-CN"
+  Write-Host " 2. 诊断当前状态"
+  Write-Host " 3. 检查官方更新"
+  Write-Host " 4. 一键更新并重新汉化"
   Write-Host ""
-  Write-Host "Repair"
-  Write-Host " 5. Fix claude:// callback"
-  Write-Host " 6. Install OAuth callback bridge"
-  Write-Host " 7. Prepare login and start"
-  Write-Host " 8. Force en-US resources to Chinese"
-  Write-Host " 9. Re-inject remote claude.ai translation"
-  Write-Host "10. Manually submit claude:// callback"
+  Write-Host "修复工具"
+  Write-Host " 5. 修复 claude:// 回调"
+  Write-Host " 6. 安装 OAuth 回调桥接器"
+  Write-Host " 7. 准备登录并启动"
+  Write-Host " 8. 强制 en-US 资源加载中文"
+  Write-Host " 9. 重新注入远程 claude.ai 页面汉化"
+  Write-Host "10. 手动提交 claude:// 回调"
   Write-Host ""
-  Write-Host "Translation"
-  Write-Host "11. Scan untranslated text"
-  Write-Host "12. Apply local translation overrides"
-  Write-Host "13. Generate coverage report"
+  Write-Host "翻译维护"
+  Write-Host "11. 扫描待翻译文本"
+  Write-Host "12. 应用本地增量翻译"
+  Write-Host "13. 生成覆盖报告"
   Write-Host ""
-  Write-Host "Backup"
-  Write-Host "14. Show latest update backup"
-  Write-Host "15. Roll back to latest update backup"
+  Write-Host "备份回滚"
+  Write-Host "14. 查看最近更新备份"
+  Write-Host "15. 回滚到最近更新备份"
   Write-Host ""
-  Write-Host " 0. Exit"
+  Write-Host " 0. 退出"
   Write-Host ""
 
-  $choice = Read-Host "Select"
+  $choice = Read-Host "请选择"
 
   try {
     if ($choice -eq "0") { exit 0 }
@@ -78,10 +78,10 @@ while ($true) {
     if ($choice -eq "2") { & (Join-Path $PSScriptRoot "diagnose.ps1"); Pause-ClaudeZhMenu; continue }
     if ($choice -eq "3") { & (Join-Path $PSScriptRoot "update-and-patch.ps1") -CheckOnly; Pause-ClaudeZhMenu; continue }
     if ($choice -eq "4") {
-      if (Confirm-ClaudeZhManagerAction -Token "UPDATE" -Message "This will close Claude, update/rebuild the app, re-apply patches, and create a backup.") {
+      if (Confirm-ClaudeZhManagerAction -Token "UPDATE" -Message "这会关闭 Claude、更新/重建应用、重新应用补丁，并创建备份。") {
         & (Join-Path $PSScriptRoot "update-and-patch.ps1") -Force -CloseClaude
       } else {
-        Write-Host "Update canceled." -ForegroundColor Yellow
+        Write-Host "已取消更新。" -ForegroundColor Yellow
       }
       Pause-ClaudeZhMenu
       continue
@@ -100,7 +100,7 @@ while ($true) {
       foreach ($result in $results) {
         Write-Host "  $($result.Changed) override(s): $($result.Override)"
       }
-      Write-Host "If remote page overrides changed, select 9 to re-inject remote translation." -ForegroundColor Yellow
+      Write-Host "如果远程页面翻译有变化，请选择 9 重新注入。" -ForegroundColor Yellow
       Pause-ClaudeZhMenu
       continue
     }
@@ -109,9 +109,9 @@ while ($true) {
     if ($choice -eq "14") {
       $latest = Get-ClaudeZhLatestUpdateBackup -Config $config
       if ($null -eq $latest) {
-        Write-Host "No update backup found." -ForegroundColor Yellow
+        Write-Host "没有找到更新备份。" -ForegroundColor Yellow
       } else {
-        Write-Host "Latest backup: $($latest.FullName)" -ForegroundColor Green
+        Write-Host "最近备份: $($latest.FullName)" -ForegroundColor Green
         $manifestPath = Join-Path $latest.FullName "manifest.json"
         if (Test-Path -LiteralPath $manifestPath) {
           $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -129,11 +129,11 @@ while ($true) {
       continue
     }
 
-    Write-Host "Unknown option: $choice" -ForegroundColor Red
+    Write-Host "未知选项: $choice" -ForegroundColor Red
     Pause-ClaudeZhMenu
   } catch {
     Write-Host ""
-    Write-Host "Failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "执行失败: $($_.Exception.Message)" -ForegroundColor Red
     Pause-ClaudeZhMenu
   }
 }

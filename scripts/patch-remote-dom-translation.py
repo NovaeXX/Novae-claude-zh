@@ -250,16 +250,19 @@ def main() -> int:
 
     config_path = Path(args.config)
     config = load_json(config_path)
-    fomo_script = Path(config["fomoPatchScript"])
+    patch_script_value = config.get("patchScript")
+    if not patch_script_value:
+        raise SystemExit("Missing patch script path in config. Set patchScript in config/paths.local.json.")
+    patch_script = Path(patch_script_value)
     app_dir = Path(config["portableClaudeDir"])
     asar = app_dir / "resources" / "app.asar"
     reports_dir = Path(config.get("projectRoot", config_path.parent.parent)) / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     pending_path = reports_dir / "runtime-remote-dom-pending.json"
 
-    spec = importlib.util.spec_from_file_location("fomo_patcher", fomo_script)
-    fomo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(fomo)
+    spec = importlib.util.spec_from_file_location("claude_zh_patch_tool", patch_script)
+    patch_tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(patch_tool)
 
     exact, phrase, fragments, source_en, remote_override_count, remote_fragment_count = build_translation_pairs(config)
     snippet = make_snippet(exact, phrase, fragments, pending_path)
@@ -273,10 +276,10 @@ def main() -> int:
         return text.replace(marker, snippet + marker, 1).encode("utf-8")
 
     data = asar.read_bytes()
-    old_hash = fomo.asar_header_hash(data)
+    old_hash = patch_tool.asar_header_hash(data)
     try:
-        backup = fomo.backup_file(asar, "before-remote-dom-zh-CN")
-        changed, previous_hash, new_hash = fomo.patch_asar_file_bytes(asar, TARGET_PATH, patcher)
+        backup = patch_tool.backup_file(asar, "before-remote-dom-zh-CN")
+        changed, previous_hash, new_hash = patch_tool.patch_asar_file_bytes(asar, TARGET_PATH, patcher)
     except PermissionError as exc:
         raise SystemExit(
             "Access denied while patching app.asar. Fully close Claude, then run this script "
@@ -290,10 +293,10 @@ def main() -> int:
         raise
 
     if changed:
-        fomo.patch_exe_asar_header_hash(
+        patch_tool.patch_exe_asar_header_hash(
             app_dir,
             new_hash,
-            [previous_hash, old_hash, *fomo.backup_header_hashes(asar)],
+            [previous_hash, old_hash, *patch_tool.backup_header_hashes(asar)],
             "before-remote-dom-zh-CN",
         )
 
