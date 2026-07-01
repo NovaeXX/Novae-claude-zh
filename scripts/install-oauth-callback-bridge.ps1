@@ -22,30 +22,7 @@ try {
   Write-Host "警告：更新语言配置失败，将继续安装桥接器。$($_.Exception.Message)" -ForegroundColor Yellow
 }
 
-$command = New-ClaudeZhBridgeProtocolCommand -BridgeScript $bridgeScript
-
-Write-Host "正在写入 HKCU\Software\Classes\claude ..."
-$protocolKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Software\Classes\claude", $true)
-if ($null -eq $protocolKey) {
-  throw "无法创建 HKCU\Software\Classes\claude"
-}
-try {
-  $protocolKey.SetValue("", "URL:claude", [Microsoft.Win32.RegistryValueKind]::String)
-  $protocolKey.SetValue("URL Protocol", "", [Microsoft.Win32.RegistryValueKind]::String)
-} finally {
-  $protocolKey.Close()
-}
-
-Write-Host "正在写入 HKCU\Software\Classes\claude\shell\open\command ..."
-$commandKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Software\Classes\claude\shell\open\command", $true)
-if ($null -eq $commandKey) {
-  throw "无法创建 HKCU\Software\Classes\claude\shell\open\command"
-}
-try {
-  $commandKey.SetValue("", $command, [Microsoft.Win32.RegistryValueKind]::String)
-} finally {
-  $commandKey.Close()
-}
+$command = Set-ClaudeProtocolToBridge -BridgeScript $bridgeScript
 
 $protocol = Get-ClaudeProtocolCommand
 Write-Host ""

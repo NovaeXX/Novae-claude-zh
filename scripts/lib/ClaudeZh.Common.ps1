@@ -217,6 +217,22 @@ function Set-ClaudeProtocolToLauncher {
   }
 
   $command = New-ClaudeZhLauncherProtocolCommand -Config $Config
+  return (Set-ClaudeProtocolCommand -Command $command)
+}
+
+function Set-ClaudeProtocolToBridge {
+  param([Parameter(Mandatory = $true)][string]$BridgeScript)
+
+  if (-not (Test-Path -LiteralPath $BridgeScript)) {
+    throw "回调桥接脚本不存在: $BridgeScript"
+  }
+
+  $command = New-ClaudeZhBridgeProtocolCommand -BridgeScript $BridgeScript
+  return (Set-ClaudeProtocolCommand -Command $command)
+}
+
+function Set-ClaudeProtocolCommand {
+  param([Parameter(Mandatory = $true)][string]$Command)
 
   Write-Host "正在写入 HKCU\Software\Classes\claude ..."
   $protocolKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Software\Classes\claude", $true)
@@ -236,12 +252,12 @@ function Set-ClaudeProtocolToLauncher {
     throw "无法创建 HKCU\Software\Classes\claude\shell\open\command"
   }
   try {
-    $commandKey.SetValue("", $command, [Microsoft.Win32.RegistryValueKind]::String)
+    $commandKey.SetValue("", $Command, [Microsoft.Win32.RegistryValueKind]::String)
   } finally {
     $commandKey.Close()
   }
 
-  return $command
+  return $Command
 }
 
 function Backup-ClaudeProtocolCommand {

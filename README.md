@@ -66,6 +66,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\diagnose.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-oauth-callback-bridge.ps1
 ```
 
+登录后又打开新登录窗口时：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-login.ps1
+```
+
 重新注入远程页面汉化：
 
 ```powershell
