@@ -6,6 +6,106 @@ function Get-ClaudeZhProjectRoot {
   return Split-Path -Parent $scriptDir
 }
 
+function Get-ClaudeZhScriptsDir {
+  return Split-Path -Parent $PSScriptRoot
+}
+
+function Get-ClaudeZhBridgeScriptPath {
+  return Join-Path (Get-ClaudeZhScriptsDir) "manual-oauth-callback.ps1"
+}
+
+function Test-ClaudeZhProtocolCommandContainsPath {
+  param(
+    [AllowNull()][string]$Command,
+    [Parameter(Mandatory = $true)][string]$ExpectedPath
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Command) -or [string]::IsNullOrWhiteSpace($ExpectedPath)) {
+    return $false
+  }
+
+  $commandText = ($Command + "").Replace("/", "\")
+  $expectedText = ([System.IO.Path]::GetFullPath($ExpectedPath)).Replace("/", "\")
+  return ($commandText.IndexOf($expectedText, [System.StringComparison]::OrdinalIgnoreCase) -ge 0)
+}
+
+function New-ClaudeZhLauncherProtocolCommand {
+  param([Parameter(Mandatory = $true)]$Config)
+
+  $wscriptPath = Join-Path $env:SystemRoot "System32\wscript.exe"
+  return '"' + $wscriptPath + '" "' + $Config.launcherPath + '" "%1"'
+}
+
+function New-ClaudeZhBridgeProtocolCommand {
+  param([Parameter(Mandatory = $true)][string]$BridgeScript)
+
+  $powershellPath = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+  return '"' + $powershellPath + '" -NoProfile -ExecutionPolicy Bypass -File "' + $BridgeScript + '" -FromProtocol -CallbackUrl "%1"'
+}
+
+function Get-ClaudeZhProtocolStatus {
+  param(
+    [Parameter(Mandatory = $true)]$Config,
+    [Parameter(Mandatory = $true)]$Protocol
+  )
+
+  $hkcu = $Protocol.HKCU + ""
+  $hkcr = $Protocol.HKCR + ""
+  $commands = @($hkcu, $hkcr)
+  $bridgeScript = Get-ClaudeZhBridgeScriptPath
+  $launcherPath = $Config.launcherPath
+
+  if (@($commands | Where-Object { Test-ClaudeZhProtocolCommandContainsPath -Command $_ -ExpectedPath $bridgeScript }).Count -gt 0) {
+    return "bridge-current"
+  }
+
+  if (@($commands | Where-Object { Test-ClaudeZhProtocolCommandContainsPath -Command $_ -ExpectedPath $launcherPath }).Count -gt 0) {
+    return "launcher-current"
+  }
+
+  $protocolText = $hkcu + $hkcr
+  if ($protocolText -like "*manual-oauth-callback.ps1*") {
+    return "bridge-stale"
+  }
+
+  if ($protocolText -like "*launch_claude_zh_cn.vbs*") {
+    return "launcher-stale"
+  }
+
+  return "not-zh-cn"
+}
+
+function ConvertTo-ClaudeZhRegString {
+  param([AllowNull()][string]$Value)
+
+  $escaped = ($Value + "") -replace '\\', '\\'
+  $escaped = $escaped -replace '"', '\"'
+  return '"' + $escaped + '"'
+}
+
+function New-ClaudeZhOAuthCallbackRegFile {
+  param([Parameter(Mandatory = $true)]$Config)
+
+  $root = Get-ClaudeZhProjectRoot
+  $regPath = Join-Path $root "config\install-claude-oauth-callback.reg"
+  $command = New-ClaudeZhLauncherProtocolCommand -Config $Config
+
+  $lines = @(
+    "Windows Registry Editor Version 5.00",
+    "",
+    "[HKEY_CURRENT_USER\Software\Classes\claude]",
+    "@=" + (ConvertTo-ClaudeZhRegString -Value "URL:claude"),
+    '"URL Protocol"=""',
+    "",
+    "[HKEY_CURRENT_USER\Software\Classes\claude\shell\open\command]",
+    "@=" + (ConvertTo-ClaudeZhRegString -Value $command)
+  )
+
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $regPath) | Out-Null
+  Set-Content -LiteralPath $regPath -Value $lines -Encoding Unicode
+  return $regPath
+}
+
 function Get-ClaudeZhConfig {
   $root = Get-ClaudeZhProjectRoot
   $configPath = Join-Path $root "config\paths.local.json"
@@ -116,8 +216,7 @@ function Set-ClaudeProtocolToLauncher {
     throw "汉化启动器不存在，无法设置回调: $($Config.launcherPath)"
   }
 
-  $wscriptPath = Join-Path $env:SystemRoot "System32\wscript.exe"
-  $command = '"' + $wscriptPath + '" "' + $Config.launcherPath + '" "%1"'
+  $command = New-ClaudeZhLauncherProtocolCommand -Config $Config
 
   Write-Host "正在写入 HKCU\Software\Classes\claude ..."
   $protocolKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Software\Classes\claude", $true)
@@ -336,14 +435,19 @@ function Apply-ClaudeZhOverrides {
 
   $frontendTarget = Join-Path $Config.portableClaudeDir "resources\ion-dist\i18n\zh-CN.json"
   $desktopTarget = Join-Path $Config.portableClaudeDir "resources\zh-CN.json"
-  $statsigTarget = Join-Path $Config.portableClaudeDir "resources\statsig\zh-CN.json"
+  $statsigTargets = @(
+    (Join-Path $Config.portableClaudeDir "resources\ion-dist\i18n\statsig\zh-CN.json"),
+    (Join-Path $Config.portableClaudeDir "resources\statsig\zh-CN.json")
+  )
 
   $results = @()
   $results += Merge-ClaudeZhJsonOverride -TargetPath $frontendTarget -OverridePath (Join-Path $Config.overridesDir "frontend-zh-CN.override.json")
   $results += Merge-ClaudeZhJsonOverride -TargetPath $desktopTarget -OverridePath (Join-Path $Config.overridesDir "desktop-zh-CN.override.json")
 
-  if (Test-Path -LiteralPath $statsigTarget) {
-    $results += Merge-ClaudeZhJsonOverride -TargetPath $statsigTarget -OverridePath (Join-Path $Config.overridesDir "statsig-zh-CN.override.json")
+  foreach ($statsigTarget in $statsigTargets) {
+    if (Test-Path -LiteralPath $statsigTarget) {
+      $results += Merge-ClaudeZhJsonOverride -TargetPath $statsigTarget -OverridePath (Join-Path $Config.overridesDir "statsig-zh-CN.override.json")
+    }
   }
 
   return $results

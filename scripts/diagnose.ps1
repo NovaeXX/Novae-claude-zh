@@ -19,15 +19,7 @@ if (Test-Path -LiteralPath $remotePendingPath) {
   }
 }
 
-$protocolText = $protocol.HKCU + $protocol.HKCR
-$protocolStatus = "unknown"
-if ($protocolText -like "*manual-oauth-callback.ps1*") {
-  $protocolStatus = "bridge"
-} elseif ($protocolText -like "*launch_claude_zh_cn.vbs*") {
-  $protocolStatus = "launcher"
-} else {
-  $protocolStatus = "not-zh-cn"
-}
+$protocolStatus = Get-ClaudeZhProtocolStatus -Config $config -Protocol $protocol
 
 $report = [pscustomobject]@{
   createdAt = (Get-Date).ToString("s")
@@ -98,10 +90,14 @@ Write-Host ""
 Write-Host "claude:// 回调"
 Write-Host "  HKCU: $($protocol.HKCU)"
 Write-Host "  HKCR: $($protocol.HKCR)"
-if ($protocolStatus -eq "bridge") {
+if ($protocolStatus -eq "bridge-current") {
   Write-Host "  状态：本地 OAuth 桥接器已安装。" -ForegroundColor Green
-} elseif ($protocolStatus -eq "launcher") {
+} elseif ($protocolStatus -eq "launcher-current") {
   Write-Host "  状态：zh-CN 启动器已注册。" -ForegroundColor Green
+} elseif ($protocolStatus -eq "bridge-stale") {
+  Write-Host "  状态：检测到旧路径 OAuth 桥接器，请重新安装回调桥接器。" -ForegroundColor Yellow
+} elseif ($protocolStatus -eq "launcher-stale") {
+  Write-Host "  状态：检测到旧路径 zh-CN 启动器，请重新修复回调。" -ForegroundColor Yellow
 } else {
   Write-Host "  状态：未注册到 zh-CN 启动器或桥接器。" -ForegroundColor Yellow
 }

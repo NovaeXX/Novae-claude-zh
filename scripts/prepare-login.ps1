@@ -17,8 +17,8 @@ $command = Set-ClaudeProtocolToLauncher -Config $config
 Write-Host "已写入 claude:// 回调: $command" -ForegroundColor Green
 
 $protocol = Get-ClaudeProtocolCommand
-if (($protocol.HKCU + "") -notlike "*launch_claude_zh_cn.vbs*") {
-  throw "claude:// 回调写入后仍未生效。请确认当前 PowerShell 对 HKCU 注册表有写入权限，然后重新运行本脚本。"
+if (-not (Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCU -ExpectedPath $config.launcherPath)) {
+  throw "claude:// 回调写入后仍未指向当前项目的汉化启动器。请确认当前 PowerShell 对 HKCU 注册表有写入权限，然后重新运行本脚本。"
 }
 
 if (-not (Test-Path -LiteralPath $config.launcherPath)) {

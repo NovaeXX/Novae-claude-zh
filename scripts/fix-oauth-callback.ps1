@@ -20,8 +20,9 @@ if ($code -ne 0) {
     Write-Host "已写入 HKCU claude:// 回调: $command" -ForegroundColor Green
   } catch {
     Write-Host "当前环境无法写入 HKCU 注册表: $($_.Exception.Message)" -ForegroundColor Red
+    $regPath = New-ClaudeZhOAuthCallbackRegFile -Config $config
     Write-Host "请在普通 PowerShell 窗口运行本脚本，或双击导入以下文件:" -ForegroundColor Yellow
-    Write-Host "  $((Get-Item (Join-Path (Split-Path -Parent $PSScriptRoot) 'config\install-claude-oauth-callback.reg')).FullName)" -ForegroundColor Yellow
+    Write-Host "  $regPath" -ForegroundColor Yellow
     throw
   }
 }
@@ -32,7 +33,8 @@ Write-Host "当前 claude:// 回调:"
 Write-Host "  HKCU: $($protocol.HKCU)"
 Write-Host "  HKCR: $($protocol.HKCR)"
 
-if (($protocol.HKCU + $protocol.HKCR) -like "*launch_claude_zh_cn.vbs*") {
+if ((Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCU -ExpectedPath $config.launcherPath) -or
+  (Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCR -ExpectedPath $config.launcherPath)) {
   Write-Host "修复完成：回调已指向汉化启动器。" -ForegroundColor Green
 } else {
   Write-Host "警告：回调看起来仍未指向汉化启动器，请运行 diagnose.ps1 查看。" -ForegroundColor Yellow

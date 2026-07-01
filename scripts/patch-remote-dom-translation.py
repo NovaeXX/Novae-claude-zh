@@ -107,7 +107,7 @@ def load_remote_fragments(path: Path) -> dict[str, str]:
     }
 
 
-def latest_original_frontend_en(backup_dir: Path) -> Path:
+def latest_original_frontend_en(backup_dir: Path, app_dir: Path) -> Path:
     # Locale shadow backups keep the original en-US file before it is overwritten
     # with zh-CN. The file with the fewest CJK characters is the safest source.
     candidates = []
@@ -116,7 +116,13 @@ def latest_original_frontend_en(backup_dir: Path) -> Path:
         cjk_count = len(re.findall(r"[\u4e00-\u9fff]", raw))
         candidates.append((cjk_count, -len(raw), path))
     if not candidates:
-        raise SystemExit(f"Cannot find original frontend en-US backup under {backup_dir / 'locale-shadow'}")
+        current_en = app_dir / "resources" / "ion-dist" / "i18n" / "en-US.json"
+        if current_en.exists():
+            return current_en
+        raise SystemExit(
+            f"Cannot find original frontend en-US resource under {backup_dir / 'locale-shadow'} "
+            f"or {current_en}"
+        )
     candidates.sort()
     return candidates[0][2]
 
@@ -129,7 +135,7 @@ def build_translation_pairs(config: dict) -> tuple[dict[str, str], list[tuple[st
     backup_dir = Path(config["backupDir"])
     app_dir = Path(config["portableClaudeDir"])
     overrides_dir = Path(config["overridesDir"])
-    en_path = latest_original_frontend_en(backup_dir)
+    en_path = latest_original_frontend_en(backup_dir, app_dir)
     zh_path = app_dir / "resources" / "ion-dist" / "i18n" / "zh-CN.json"
     if not zh_path.exists():
         raise SystemExit(f"Missing zh-CN frontend resource: {zh_path}")

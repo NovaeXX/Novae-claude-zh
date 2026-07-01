@@ -1,7 +1,7 @@
 ﻿. "$PSScriptRoot\lib\ClaudeZh.Common.ps1"
 
 $config = Get-ClaudeZhConfig
-$bridgeScript = Join-Path $PSScriptRoot "manual-oauth-callback.ps1"
+$bridgeScript = Get-ClaudeZhBridgeScriptPath
 
 if (-not (Test-Path -LiteralPath $bridgeScript)) {
   throw "Missing callback bridge script: $bridgeScript"
@@ -22,8 +22,7 @@ try {
   Write-Host "警告：更新语言配置失败，将继续安装桥接器。$($_.Exception.Message)" -ForegroundColor Yellow
 }
 
-$powershellPath = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
-$command = '"' + $powershellPath + '" -NoProfile -ExecutionPolicy Bypass -File "' + $bridgeScript + '" -FromProtocol -CallbackUrl "%1"'
+$command = New-ClaudeZhBridgeProtocolCommand -BridgeScript $bridgeScript
 
 Write-Host "正在写入 HKCU\Software\Classes\claude ..."
 $protocolKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Software\Classes\claude", $true)
@@ -52,8 +51,8 @@ $protocol = Get-ClaudeProtocolCommand
 Write-Host ""
 Write-Host "当前 HKCU 处理器: $($protocol.HKCU)"
 
-if (($protocol.HKCU + "") -notlike "*manual-oauth-callback.ps1*") {
-  throw "回调桥接器验证失败。"
+if (-not (Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCU -ExpectedPath $bridgeScript)) {
+  throw "回调桥接器验证失败：HKCU 没有指向当前项目的桥接脚本。"
 }
 
 Write-Host "回调桥接器已安装。" -ForegroundColor Green

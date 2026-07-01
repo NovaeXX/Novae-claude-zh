@@ -37,8 +37,8 @@ Write-Host "已写入 claude:// 回调: $command" -ForegroundColor Green
 
 $protocol = Get-ClaudeProtocolCommand
 Write-Host "当前 HKCU 回调: $($protocol.HKCU)"
-if (($protocol.HKCU + "") -notlike "*launch_claude_zh_cn.vbs*") {
-  throw "回调验证失败：HKCU 没有指向汉化启动器。"
+if (-not (Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCU -ExpectedPath $config.launcherPath)) {
+  throw "回调验证失败：HKCU 没有指向当前项目的汉化启动器。"
 }
 
 Write-Host "准备完成。请只在已经打开的 Claude zh-CN 窗口点击 Google 登录。" -ForegroundColor Green
