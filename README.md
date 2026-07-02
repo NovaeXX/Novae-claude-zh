@@ -15,6 +15,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1
 - 创建本机配置 `config\paths.local.json`
 - 创建 `backups/`、`reports/`、`downloads/`、`logs/`
 - 检查 Python、补丁脚本、Claude 目录、启动器和用户数据目录
+- 创建或刷新桌面与开始菜单里的 `Claude zh-CN` 快捷方式
 - 运行诊断，告诉你当前环境是否可以继续
 
 如果希望部署时同步安装登录回调桥接器：
@@ -44,9 +45,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-mana
 
 ### 3. 桌面快捷方式
 
-桌面快捷方式由补丁工具的用户设置流程创建或刷新，不是 `setup.ps1` 本身的固定承诺。
+`setup.ps1` 会自动创建或刷新当前用户桌面和开始菜单里的 `Claude zh-CN` 快捷方式。它会指向项目配置里的 Claude zh-CN 启动器。
 
-如果桌面或开始菜单里已经出现 `Claude zh-CN`，后续可以直接双击它启动应用。它会使用项目配置里的汉化版 Claude 和独立用户数据目录。
+部署完成后，如果桌面或开始菜单里已经出现 `Claude zh-CN`，后续可以直接双击它启动应用。它会使用项目配置里的汉化版 Claude 和独立用户数据目录。
 
 如果没有看到桌面快捷方式，可以继续用管理器启动：
 
@@ -54,7 +55,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-mana
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-manager.ps1
 ```
 
-管理器的“一键更新并重新汉化”流程会刷新启动器、快捷方式和语言配置。
+如需跳过快捷方式创建，可以运行：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -SkipShortcuts
+```
 
 ### 4. 登录前准备
 

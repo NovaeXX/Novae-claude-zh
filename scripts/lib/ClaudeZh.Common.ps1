@@ -297,6 +297,89 @@ function Test-ClaudeZhLauncher {
   }
 }
 
+function New-ClaudeZhShortcut {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$TargetPath,
+    [string]$Arguments = "",
+    [string]$WorkingDirectory = "",
+    [string]$IconLocation = "",
+    [string]$Description = ""
+  )
+
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Path) | Out-Null
+
+  $shell = New-Object -ComObject WScript.Shell
+  $shortcut = $shell.CreateShortcut($Path)
+  $shortcut.TargetPath = $TargetPath
+  $shortcut.Arguments = $Arguments
+  if (-not [string]::IsNullOrWhiteSpace($WorkingDirectory)) {
+    $shortcut.WorkingDirectory = $WorkingDirectory
+  }
+  if (-not [string]::IsNullOrWhiteSpace($IconLocation)) {
+    $shortcut.IconLocation = $IconLocation
+  }
+  if (-not [string]::IsNullOrWhiteSpace($Description)) {
+    $shortcut.Description = $Description
+  }
+  $shortcut.Save()
+
+  return $Path
+}
+
+function Install-ClaudeZhShortcuts {
+  param([Parameter(Mandatory = $true)]$Config)
+
+  if (-not (Test-Path -LiteralPath $Config.launcherPath -PathType Leaf)) {
+    throw "汉化启动器不存在，无法创建快捷方式: $($Config.launcherPath)"
+  }
+
+  $wscriptPath = Join-Path $env:SystemRoot "System32\wscript.exe"
+  if (-not (Test-Path -LiteralPath $wscriptPath -PathType Leaf)) {
+    throw "未找到 wscript.exe: $wscriptPath"
+  }
+
+  $iconPath = Join-Path $Config.portableClaudeDir "Claude.exe"
+  if (-not (Test-Path -LiteralPath $iconPath -PathType Leaf)) {
+    $iconPath = $wscriptPath
+  }
+
+  $targets = @()
+  $desktopDir = [Environment]::GetFolderPath("DesktopDirectory")
+  if (-not [string]::IsNullOrWhiteSpace($desktopDir)) {
+    $targets += [pscustomobject]@{
+      Name = "桌面"
+      Path = Join-Path $desktopDir "Claude zh-CN.lnk"
+    }
+  }
+
+  $programsDir = [Environment]::GetFolderPath("Programs")
+  if (-not [string]::IsNullOrWhiteSpace($programsDir)) {
+    $targets += [pscustomobject]@{
+      Name = "开始菜单"
+      Path = Join-Path $programsDir "Claude zh-CN.lnk"
+    }
+  }
+
+  $created = @()
+  foreach ($target in $targets) {
+    $path = New-ClaudeZhShortcut `
+      -Path $target.Path `
+      -TargetPath $wscriptPath `
+      -Arguments ('"' + $Config.launcherPath + '"') `
+      -WorkingDirectory (Split-Path -Parent $Config.launcherPath) `
+      -IconLocation $iconPath `
+      -Description "启动 Claude zh-CN"
+
+    $created += [pscustomobject]@{
+      Name = $target.Name
+      Path = $path
+    }
+  }
+
+  return $created
+}
+
 function Set-ClaudeZhPortableLocale {
   param([Parameter(Mandatory = $true)]$Config)
 

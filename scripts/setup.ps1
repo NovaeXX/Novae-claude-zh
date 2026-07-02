@@ -1,6 +1,7 @@
 ﻿param(
   [switch]$Force,
   [switch]$InstallCallbackBridge,
+  [switch]$SkipShortcuts,
   [switch]$RunManager,
   [string]$PythonExe,
   [string]$PatchToolRoot,
@@ -186,6 +187,37 @@ Test-SetupDirectory -Label "便携版 Claude 目录" -Path $config.portableClaud
 Test-SetupFile -Label "Claude.exe" -Path (Join-Path $config.portableClaudeDir "Claude.exe") | Out-Null
 Test-SetupDirectory -Label "用户数据目录" -Path $config.portableUserDataDir | Out-Null
 Test-SetupFile -Label "启动器" -Path $config.launcherPath | Out-Null
+
+if (-not $SkipShortcuts) {
+  Write-Host ""
+  Write-Host "创建快捷启动方式" -ForegroundColor Cyan
+  Write-Host "这会在当前用户的桌面和开始菜单创建 Claude zh-CN 快捷方式。"
+
+  try {
+    if (Test-Path -LiteralPath $config.patchScript -PathType Leaf) {
+      Write-Host "正在刷新启动器、快捷方式和用户设置..."
+      $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
+      if ($code -ne 0) {
+        Write-Host "补丁工具 --apply-user-settings 返回码: $code。将继续尝试使用现有启动器创建快捷方式。" -ForegroundColor Yellow
+      }
+    }
+  } catch {
+    Write-Host "刷新启动器时出现警告: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+
+  try {
+    $shortcutResults = Install-ClaudeZhShortcuts -Config $config
+    foreach ($shortcut in $shortcutResults) {
+      Write-Host "  已创建 $($shortcut.Name) 快捷方式: $($shortcut.Path)" -ForegroundColor Green
+    }
+  } catch {
+    Write-Host "快捷方式创建失败: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "你仍然可以运行管理器启动 Claude zh-CN。"
+  }
+} else {
+  Write-Host ""
+  Write-Host "已跳过快捷方式创建。" -ForegroundColor Yellow
+}
 
 Write-Host ""
 Write-Host "运行诊断" -ForegroundColor Cyan

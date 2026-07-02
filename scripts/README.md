@@ -10,7 +10,7 @@
 
 - `claude-zh-manager.ps1`：菜单式管理器入口。
 - `diagnose.ps1`：检查路径、进程、登录回调、语言资源覆盖，并生成 `reports/latest-diagnose.json`。
-- `setup.ps1`：首次部署向导，创建本机配置、检查依赖并运行诊断。
+- `setup.ps1`：首次部署向导，创建本机配置、检查依赖、创建桌面/开始菜单快捷方式并运行诊断。
 - `update-and-patch.ps1`：检查/更新官方版本，应用基础资源、本地增量、en-US 影子资源、远程页面汉化和 OAuth 桥接。
 - `scan-untranslated.ps1`：扫描本地资源、运行时远程待翻译文本、日志英文片段，生成待翻译清单。
 - `rollback-last-backup.ps1`：回滚到最近一次更新前备份。
