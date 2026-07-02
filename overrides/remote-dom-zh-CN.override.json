@@ -132,5 +132,11 @@
   "Add and manage MCP 服务器 that you're working on.": "添加并管理你正在使用的 MCP 服务器。",
   "使用内置 Node.js 进行 MCP": "使用内置 Node.js 运行 MCP",
   "If enabled, Claude will never use the system Node.js for extension MCP 服务器. This happens automatically when system’s Node.js is missing or outdated.": "启用后，Claude 绝不会使用系统 Node.js 来运行扩展 MCP 服务器。当系统 Node.js 缺失或版本过旧时，这会自动发生。",
-  "If enabled, Claude will never use the system Node.js for extension MCP 服务器. This happens automatically when system's Node.js is missing or outdated.": "启用后，Claude 绝不会使用系统 Node.js 来运行扩展 MCP 服务器。当系统 Node.js 缺失或版本过旧时，这会自动发生。"
+  "If enabled, Claude will never use the system Node.js for extension MCP 服务器. This happens automatically when system's Node.js is missing or outdated.": "启用后，Claude 绝不会使用系统 Node.js 来运行扩展 MCP 服务器。当系统 Node.js 缺失或版本过旧时，这会自动发生。",
+  "Claude for Windows": "Claude for Windows",
+  "Claude for 窗户": "Claude for Windows",
+  "The fastest way to talk with Claude": "与 Claude 对话的最快方式",
+  "The fastest way to talk to Claude": "与 Claude 对话最快的方式",
+  "The fastest way to chat with Claude": "与 Claude 对话最快的方式",
+  "The fastest way to use Claude": "使用 Claude 最快的方式"
 }

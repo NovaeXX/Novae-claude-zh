@@ -196,5 +196,21 @@
   "managed separately": "需单独管理",
   "system Node.js": "系统 Node.js",
   "extension MCP 服务器": "扩展 MCP 服务器",
-  "missing or outdated": "缺失或版本过旧"
+  "missing or outdated": "缺失或版本过旧",
+  "Claude for 窗户": "Claude for Windows",
+  "Claude for Windows": "Claude for Windows",
+  "for 窗户": "for Windows",
+  "窗户": "Windows",
+  "The fastest way to talk with Claude": "与 Claude 对话的最快方式",
+  "The fastest way to talk to Claude": "与 Claude 对话最快的方式",
+  "The fastest way to chat with Claude": "与 Claude 对话最快的方式",
+  "Good morning，": "早上好，",
+  "Good afternoon，": "下午好，",
+  "Good evening，": "晚上好，",
+  "morning, ": "早上好，",
+  "afternoon, ": "下午好，",
+  "evening, ": "晚上好，",
+  "morning，": "早上好，",
+  "afternoon，": "下午好，",
+  "evening，": "晚上好，"
 }

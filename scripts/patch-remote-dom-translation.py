@@ -91,7 +91,10 @@ def load_remote_overrides(path: Path) -> dict[str, str]:
             continue
         source = normalize_text(source)
         target = normalize_text(target)
-        if not source or not target or source == target or not has_cjk(target):
+        keep_identity = source == target and re.search(r"\b(Windows|macOS|iOS|Android)\b", source)
+        if not source or not target or (source == target and not keep_identity):
+            continue
+        if not has_cjk(target) and not has_cjk(source) and not keep_identity:
             continue
         overrides[source] = target
 
