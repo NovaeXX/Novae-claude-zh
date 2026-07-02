@@ -42,7 +42,21 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-mana
 - 扫描待翻译文本
 - 回滚到最近备份
 
-### 3. 登录前准备
+### 3. 桌面快捷方式
+
+桌面快捷方式由补丁工具的用户设置流程创建或刷新，不是 `setup.ps1` 本身的固定承诺。
+
+如果桌面或开始菜单里已经出现 `Claude zh-CN`，后续可以直接双击它启动应用。它会使用项目配置里的汉化版 Claude 和独立用户数据目录。
+
+如果没有看到桌面快捷方式，可以继续用管理器启动：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\claude-zh-manager.ps1
+```
+
+管理器的“一键更新并重新汉化”流程会刷新启动器、快捷方式和语言配置。
+
+### 4. 登录前准备
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-login.ps1
@@ -50,7 +64,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-login.
 
 这个命令会关闭当前 Claude 进程、确认 zh-CN 配置、写入当前项目的 OAuth 回调桥接器，并启动 Claude zh-CN。它只做启动前和启动后的一次性校验，不会在登录期间常驻守护。
 
-### 4. 常用命令
+### 5. 常用命令
 
 诊断当前状态：
 
