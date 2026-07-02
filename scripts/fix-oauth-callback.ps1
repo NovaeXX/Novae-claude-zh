@@ -3,7 +3,7 @@
 $config = Get-ClaudeZhConfig
 
 Write-Host ""
-Write-Host "修复 claude:// 登录回调" -ForegroundColor Cyan
+Write-Host "配置 claude:// 登录回调" -ForegroundColor Cyan
 Write-Host "这会修改当前 Windows 用户的 claude:// 协议处理器。" -ForegroundColor Yellow
 Write-Host "影响：浏览器完成 Claude 登录后会优先回到汉化版启动器。"
 Write-Host ""
@@ -35,7 +35,7 @@ Write-Host "  HKCR: $($protocol.HKCR)"
 
 if ((Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCU -ExpectedPath $config.launcherPath) -or
   (Test-ClaudeZhProtocolCommandContainsPath -Command $protocol.HKCR -ExpectedPath $config.launcherPath)) {
-  Write-Host "修复完成：回调已指向汉化启动器。" -ForegroundColor Green
+  Write-Host "配置完成：回调已指向汉化启动器。" -ForegroundColor Green
 } else {
   Write-Host "警告：回调看起来仍未指向汉化启动器，请运行 diagnose.ps1 查看。" -ForegroundColor Yellow
 }

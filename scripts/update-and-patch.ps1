@@ -9,7 +9,7 @@
 $config = Get-ClaudeZhConfig
 
 Write-Host ""
-Write-Host "Claude zh-CN update and patch" -ForegroundColor Cyan
+Write-Host "Claude zh-CN 更新与重新汉化" -ForegroundColor Cyan
 Write-Host ""
 
 $checkCode = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--check-update")
@@ -19,68 +19,68 @@ if ($CheckOnly) {
 }
 
 if ($CloseClaude) {
-  Write-Host "Closing Claude processes before patching..."
+  Write-Host "正在关闭 Claude 进程..."
   Stop-ClaudeProcessesForLogin -Config $config
   Start-Sleep -Seconds 2
 }
 
 Write-Host ""
-Write-Host "Creating pre-update backup..."
+Write-Host "正在创建更新前备份..."
 $backup = New-ClaudeZhUpdateBackup -Config $config -Reason "before-update-and-patch"
-Write-Host "  Backup path: $($backup.Path)"
-Write-Host "  File count:  $($backup.FileCount)"
+Write-Host "  备份路径: $($backup.Path)"
+Write-Host "  文件数量: $($backup.FileCount)"
 
 if ($checkCode -eq 0 -and -not $Force) {
-  Write-Host "Already up to date. Applying user settings and local overrides only." -ForegroundColor Green
+  Write-Host "当前已是最新版本，只应用用户设置和本地增量。" -ForegroundColor Green
   $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
   if ($code -ne 0) {
-    throw "Patch tool --apply-user-settings failed. Exit code: $code"
+    throw "补丁工具 --apply-user-settings 执行失败，退出码: $code"
   }
 } else {
-  Write-Host "Updating and rebuilding zh-CN portable Claude. This may download official MSIX." -ForegroundColor Yellow
+  Write-Host "正在更新并重建 Claude zh-CN 便携版，可能会下载官方 MSIX。" -ForegroundColor Yellow
   $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--force-download")
   if ($code -ne 0) {
-    throw "Patch tool --force-download failed. Exit code: $code"
+    throw "补丁工具 --force-download 执行失败，退出码: $code"
   }
 }
 
 Write-Host ""
-Write-Host "Applying local translation overrides..."
+Write-Host "正在应用本地增量翻译..."
 $results = Apply-ClaudeZhOverrides -Config $config
 foreach ($result in $results) {
   Write-Host "  $($result.Changed) override(s): $($result.Override)"
 }
 
 Write-Host ""
-Write-Host "Shadowing en-US resources with zh-CN resources..."
+Write-Host "正在让 en-US 资源入口加载中文资源..."
 $shadowResults = Copy-ClaudeZhLocaleShadow -Config $config
 foreach ($result in $shadowResults) {
   if ($result.Skipped) {
-    Write-Host "  Skipped $($result.Name): $($result.Reason)"
+    Write-Host "  已跳过 $($result.Name): $($result.Reason)"
   } else {
-    Write-Host "  Updated $($result.Name): $($result.Target)"
+    Write-Host "  已更新 $($result.Name): $($result.Target)"
   }
 }
 
 Write-Host ""
-Write-Host "Refreshing launcher, shortcuts, and locale settings..."
+Write-Host "正在刷新启动器、快捷方式和语言配置..."
 $code = Invoke-ClaudeZhPatchTool -Config $config -PatchArgs @("--apply-user-settings")
 if ($code -ne 0) {
-  throw "Patch tool --apply-user-settings failed. Exit code: $code"
+  throw "补丁工具 --apply-user-settings 执行失败，退出码: $code"
 }
 
 Write-Host ""
-Write-Host "Injecting remote claude.ai DOM translation..."
+Write-Host "正在注入远程 claude.ai 页面汉化..."
 & (Join-Path $PSScriptRoot "patch-remote-dom-translation.ps1")
 if ($LASTEXITCODE -ne 0) {
-  throw "Remote DOM translation patch failed. Exit code: $LASTEXITCODE"
+  throw "远程页面汉化注入失败，退出码: $LASTEXITCODE"
 }
 
 Write-Host ""
-Write-Host "Installing OAuth callback bridge..."
+Write-Host "正在安装 OAuth 回调桥接器..."
 & (Join-Path $PSScriptRoot "install-oauth-callback-bridge.ps1")
 if ($LASTEXITCODE -ne 0) {
-  throw "OAuth callback bridge install failed. Exit code: $LASTEXITCODE"
+  throw "OAuth 回调桥接器安装失败，退出码: $LASTEXITCODE"
 }
 
 $coverage = Get-ClaudeZhCoverage -Config $config
@@ -97,9 +97,9 @@ $report = [pscustomobject]@{
 $reportPath = Save-ClaudeZhJsonReport -Config $config -Name "latest-update-and-patch.json" -Data $report
 
 Write-Host ""
-Write-Host "Update and patch finished." -ForegroundColor Green
+Write-Host "更新与重新汉化完成。" -ForegroundColor Green
 if ($coverage.Exists) {
-  Write-Host "zh-CN strings with Chinese: $($coverage.Chinese)/$($coverage.Total)"
-  Write-Host "Estimated fallback count:  $($coverage.Fallback)"
+  Write-Host "包含中文的 zh-CN 文案: $($coverage.Chinese)/$($coverage.Total)"
+  Write-Host "估算回退数量: $($coverage.Fallback)"
 }
-Write-Host "Update report: $reportPath"
+Write-Host "更新报告: $reportPath"

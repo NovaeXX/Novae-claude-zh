@@ -123,8 +123,7 @@ def latest_original_frontend_en(backup_dir: Path, app_dir: Path) -> Path:
         if current_en.exists():
             return current_en
         raise SystemExit(
-            f"Cannot find original frontend en-US resource under {backup_dir / 'locale-shadow'} "
-            f"or {current_en}"
+            f"找不到原始前端 en-US 资源: {backup_dir / 'locale-shadow'} 或 {current_en}"
         )
     candidates.sort()
     return candidates[0][2]
@@ -141,7 +140,7 @@ def build_translation_pairs(config: dict) -> tuple[dict[str, str], list[tuple[st
     en_path = latest_original_frontend_en(backup_dir, app_dir)
     zh_path = app_dir / "resources" / "ion-dist" / "i18n" / "zh-CN.json"
     if not zh_path.exists():
-        raise SystemExit(f"Missing zh-CN frontend resource: {zh_path}")
+        raise SystemExit(f"缺少 zh-CN 前端资源: {zh_path}")
 
     en = load_json(en_path)
     zh = load_json(zh_path)
@@ -261,7 +260,7 @@ def main() -> int:
     config = load_json(config_path)
     patch_script_value = config.get("patchScript")
     if not patch_script_value:
-        raise SystemExit("Missing patch script path in config. Set patchScript in config/paths.local.json.")
+        raise SystemExit("配置中缺少补丁脚本路径。请在 config/paths.local.json 中设置 patchScript。")
     patch_script = Path(patch_script_value)
     app_dir = Path(config["portableClaudeDir"])
     asar = app_dir / "resources" / "app.asar"
@@ -281,7 +280,7 @@ def main() -> int:
         text = remove_existing_snippet(text)
         marker = "\n//# sourceMappingURL=mainView.js.map"
         if marker not in text:
-            raise SystemExit("Cannot find mainView.js source map marker.")
+            raise SystemExit("找不到 mainView.js source map 标记。")
         return text.replace(marker, snippet + marker, 1).encode("utf-8")
 
     data = asar.read_bytes()
@@ -291,8 +290,8 @@ def main() -> int:
         changed, previous_hash, new_hash = patch_tool.patch_asar_file_bytes(asar, TARGET_PATH, patcher)
     except PermissionError as exc:
         raise SystemExit(
-            "Access denied while patching app.asar. Fully close Claude, then run this script "
-            "from your own PowerShell window. Original error: " + str(exc)
+            "写入 app.asar 时权限不足。请彻底关闭 Claude，然后在你自己的 PowerShell 窗口重新运行本脚本。原始错误: "
+            + str(exc)
         )
     except Exception:
         if "backup" in locals() and backup.exists():
@@ -309,14 +308,14 @@ def main() -> int:
             "before-remote-dom-zh-CN",
         )
 
-    print(f"Remote DOM translation source: {source_en}")
-    print(f"Injected exact translations: {len(exact)}")
-    print(f"Injected phrase translations: {len(phrase)}")
-    print(f"Injected fragment translations: {len(fragments)}")
-    print(f"Remote override translations: {remote_override_count}")
-    print(f"Remote fragment translations: {remote_fragment_count}")
-    print(f"Runtime pending translations: {pending_path}")
-    print(f"Backed up app.asar: {backup}")
+    print(f"远程页面汉化源资源: {source_en}")
+    print(f"已注入精确翻译: {len(exact)}")
+    print(f"已注入短语翻译: {len(phrase)}")
+    print(f"已注入片段翻译: {len(fragments)}")
+    print(f"远程页面 override 数量: {remote_override_count}")
+    print(f"远程页面片段数量: {remote_fragment_count}")
+    print(f"运行时待翻译报告: {pending_path}")
+    print(f"app.asar 备份: {backup}")
     return 0
 
 

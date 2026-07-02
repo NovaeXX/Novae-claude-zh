@@ -7,6 +7,7 @@ Write-Host ""
 Write-Host "准备 Claude zh-CN 登录环境" -ForegroundColor Cyan
 Write-Host "这会关闭所有 Claude.exe 进程、强制 zh-CN，并把 claude:// 指向当前项目的 OAuth 桥接器。" -ForegroundColor Yellow
 Write-Host "作用：避免旧窗口或旧工作区接走 Google 登录回调。"
+Write-Host "说明：这里只做启动前和启动后的一次性校验，不会在登录期间常驻守护。"
 Write-Host ""
 
 Stop-ClaudeProcessesForLogin -Config $config

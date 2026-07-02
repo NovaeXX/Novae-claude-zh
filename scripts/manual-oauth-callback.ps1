@@ -18,11 +18,11 @@ function Get-RedactedClaudeCallback {
 $config = Get-ClaudeZhConfig
 
 Write-Host ""
-Write-Host "Claude zh-CN manual OAuth callback injection" -ForegroundColor Cyan
+Write-Host "Claude zh-CN 手动提交 OAuth 回调" -ForegroundColor Cyan
 
 if ([string]::IsNullOrWhiteSpace($CallbackUrl)) {
-  Write-Host "Paste the full claude:// callback URL from the browser." -ForegroundColor Yellow
-  Write-Host "Do not share this URL. It may contain one-time login credentials."
+  Write-Host "请粘贴浏览器里的完整 claude:// 回调 URL。" -ForegroundColor Yellow
+  Write-Host "不要分享这个 URL，它可能包含一次性登录凭据。"
   $CallbackUrl = Read-Host "claude:// URL"
 }
 
@@ -33,27 +33,27 @@ if (($CallbackUrl.StartsWith('"') -and $CallbackUrl.EndsWith('"')) -or ($Callbac
 }
 
 if ($CallbackUrl -notmatch "^claude://") {
-  throw "Input is not a claude:// callback URL. If the browser is on an https://claude.ai page, click Open Claude / allow external app first."
+  throw "输入内容不是 claude:// 回调 URL。如果浏览器停在 https://claude.ai 页面，请先点击 Open Claude 或允许打开外部应用。"
 }
 
 if (-not (Test-Path -LiteralPath $config.launcherPath)) {
-  throw "Claude zh-CN launcher not found: $($config.launcherPath)"
+  throw "未找到 Claude zh-CN 启动器: $($config.launcherPath)"
 }
 
 try {
   $configPath = Set-ClaudeZhPortableLocale -Config $config
-  Write-Host "Locale config verified: $configPath"
+  Write-Host "已确认语言配置: $configPath"
 } catch {
-  Write-Host "Warning: failed to update locale config. Continuing callback forwarding. $($_.Exception.Message)" -ForegroundColor Yellow
+  Write-Host "警告：更新语言配置失败，将继续转交回调。$($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 $portableProcesses = @(Get-ClaudeProcessSummary -Config $config | Where-Object { $_.Kind -eq "portable" })
 if ($portableProcesses.Count -eq 0) {
-  Write-Host "No portable Claude process found. Starting Claude zh-CN..."
+  Write-Host "未发现便携版 Claude 进程，正在启动 Claude zh-CN..."
   Start-Process -FilePath "wscript.exe" -ArgumentList "`"$($config.launcherPath)`"" -WindowStyle Hidden
   Start-Sleep -Seconds 5
 } else {
-  Write-Host "Portable Claude process found: $($portableProcesses.Id -join ', ')"
+  Write-Host "已发现便携版 Claude 进程: $($portableProcesses.Id -join ', ')"
 }
 
 $backupRoot = Join-Path $config.backupDir "oauth-callback-captures"
@@ -67,13 +67,13 @@ $capturePath = Join-Path $backupRoot ("callback-" + (Get-Date -Format "yyyyMMdd-
   callbackLength = $CallbackUrl.Length
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $capturePath -Encoding UTF8
 
-Write-Host "Redacted callback diagnostic saved: $capturePath"
-Write-Host "Forwarding callback to Claude zh-CN launcher. Full URL is not printed."
+Write-Host "已保存脱敏回调诊断: $capturePath"
+Write-Host "正在把回调转交给 Claude zh-CN 启动器。完整 URL 不会打印。"
 
 $wscriptPath = Join-Path $env:SystemRoot "System32\wscript.exe"
 & $wscriptPath $config.launcherPath $CallbackUrl
 
 Start-Sleep -Seconds 3
 
-Write-Host "Callback submitted." -ForegroundColor Green
-Write-Host "Check the existing Claude zh-CN window. If it is still not logged in, run diagnose.ps1 and keep the redacted diagnostic file."
+Write-Host "回调已提交。" -ForegroundColor Green
+Write-Host "请查看现有 Claude zh-CN 窗口。如果仍未登录，请运行 diagnose.ps1，并保留脱敏诊断文件。"

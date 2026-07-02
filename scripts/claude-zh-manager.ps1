@@ -50,8 +50,8 @@ while ($true) {
   Write-Host " 3. 检查官方更新"
   Write-Host " 4. 一键更新并重新汉化"
   Write-Host ""
-  Write-Host "修复工具"
-  Write-Host " 5. 修复 claude:// 回调"
+  Write-Host "维护工具"
+  Write-Host " 5. 配置 claude:// 回调"
   Write-Host " 6. 安装 OAuth 回调桥接器"
   Write-Host " 7. 准备登录并启动"
   Write-Host " 8. 强制 en-US 资源加载中文"
@@ -78,7 +78,7 @@ while ($true) {
     if ($choice -eq "2") { & (Join-Path $PSScriptRoot "diagnose.ps1"); Pause-ClaudeZhMenu; continue }
     if ($choice -eq "3") { & (Join-Path $PSScriptRoot "update-and-patch.ps1") -CheckOnly; Pause-ClaudeZhMenu; continue }
     if ($choice -eq "4") {
-      if (Confirm-ClaudeZhManagerAction -Token "UPDATE" -Message "这会关闭 Claude、更新/重建应用、重新应用补丁，并创建备份。") {
+      if (Confirm-ClaudeZhManagerAction -Token "UPDATE" -Message "这会关闭 Claude、更新/重建应用、重新应用汉化，并创建备份。") {
         & (Join-Path $PSScriptRoot "update-and-patch.ps1") -Force -CloseClaude
       } else {
         Write-Host "已取消更新。" -ForegroundColor Yellow

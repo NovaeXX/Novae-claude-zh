@@ -4,13 +4,14 @@ $config = Get-ClaudeZhConfig
 $bridgeScript = Get-ClaudeZhBridgeScriptPath
 
 Write-Host ""
-Write-Host "修复 Claude zh-CN 登录状态" -ForegroundColor Cyan
+Write-Host "校准 Claude zh-CN 登录状态" -ForegroundColor Cyan
 Write-Host "这个脚本会执行一个更确定的流程：" -ForegroundColor Yellow
 Write-Host "  1. 关闭所有 Claude 进程"
 Write-Host "  2. 强制汉化版配置为 zh-CN"
 Write-Host "  3. 写入当前项目的 OAuth 回调桥接器"
 Write-Host "  4. 启动汉化版"
-Write-Host "  5. 启动后再次确认回调没有被旧路径覆盖"
+Write-Host "  5. 启动后再次确认回调指向当前项目"
+Write-Host "说明：这里只做一次性校验，不会在登录期间常驻守护。"
 Write-Host ""
 
 $confirm = Read-Host "输入 REPAIR-LOGIN 继续"

@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-这是一个 Windows 版 Claude Desktop zh-CN 汉化管理项目。目标是维护本地资源汉化、远程页面 DOM 汉化、登录回调修复、更新重建和回滚流程。
+这是一个 Windows 版 Claude Desktop zh-CN 汉化管理项目。目标是维护本地资源汉化、远程页面 DOM 汉化、登录回调桥接、更新重建和回滚流程。
 
 ## 工作原则
 

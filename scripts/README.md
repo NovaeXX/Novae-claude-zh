@@ -19,9 +19,9 @@
 - `force-zh-cn-resources.ps1`：把 `en-US` 资源入口替换成中文资源，处理 Claude 把 locale 改回英文的情况。
 - `install-oauth-callback-bridge.ps1`：把 `claude://` 指向本地桥接器，捕获脱敏诊断后转交汉化版。
 - `manual-oauth-callback.ps1`：手动粘贴完整 `claude://` 回调 URL 并转交汉化版。
-- `prepare-login.ps1`：关闭 Claude、强制 zh-CN、安装当前项目 OAuth 桥接器并启动汉化版。
-- `repair-login-state.ps1`：更确定地重置登录前状态，启动后再次确认回调没有被旧路径覆盖。
-- `fix-oauth-callback.ps1`：备份并修复 `claude://` 回调到汉化启动器。
+- `prepare-login.ps1`：关闭 Claude、强制 zh-CN、安装当前项目 OAuth 桥接器并启动汉化版；只做一次性校验，不常驻守护。
+- `repair-login-state.ps1`：更确定地校准登录前状态，启动后再次确认回调指向当前项目。
+- `fix-oauth-callback.ps1`：旧入口，保留用于把 `claude://` 回调写入汉化启动器。
 - `uninstall-official-msix.ps1`：临时卸载官方 MSIX，用于排除官方版本接管回调。
 - `lib/ClaudeZh.Common.ps1`：公共函数。
 

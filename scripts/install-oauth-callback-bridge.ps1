@@ -10,6 +10,7 @@ if (-not (Test-Path -LiteralPath $bridgeScript)) {
 Write-Host ""
 Write-Host "安装 Claude zh-CN OAuth 回调桥接器" -ForegroundColor Cyan
 Write-Host "桥接器会接收 claude:// 回调，写入脱敏诊断，然后转交给 Claude zh-CN。"
+Write-Host "说明：桥接器只在浏览器触发 claude:// 时运行，不会常驻后台。"
 Write-Host ""
 
 $backup = Backup-ClaudeProtocolCommand -Config $config

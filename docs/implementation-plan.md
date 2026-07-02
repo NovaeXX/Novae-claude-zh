@@ -1,21 +1,22 @@
 # Claude zh-CN Manager 实现计划
 
-## P0：登录回调修复
+## P0：登录回调桥接
 
-目标：让 Google 登录完成后回到同一个汉化版窗口。
+目标：浏览器完成 Claude 登录后，回调进入当前项目配置的 Claude zh-CN。
 
 任务：
 
 1. 读取当前 `claude://` 协议处理器。
 2. 备份当前协议处理器到 `backups/oauth-protocol/`。
-3. 调用补丁工具的 `--prepare-oauth-login`，让回调指向汉化启动器。
+3. 写入当前项目的 OAuth 回调桥接器。
 4. 验证启动器是否带 `--user-data-dir`。
 5. 诊断报告中显示当前回调状态。
 
 验收：
 
-- `claude://` 指向 `launch_claude_zh_cn.vbs`。
-- 登录回调进入 `ClaudeZhCN-3p` 用户数据目录。
+- `claude://` 指向当前项目的 `manual-oauth-callback.ps1` 或 Claude zh-CN 启动器。
+- 登录回调进入项目配置的 Claude zh-CN 用户数据目录。
+- 登录准备流程不启动常驻守护进程，只做启动前和启动后的一次性校验。
 
 ## P1：一键更新并重新汉化
 
@@ -43,7 +44,7 @@
 
 1. 启动 Claude zh-CN。
 2. 诊断当前状态。
-3. 修复登录回调。
+3. 配置登录回调桥接器。
 4. 检查官方更新。
 5. 一键更新并重新汉化。
 6. 应用本地增量翻译。
